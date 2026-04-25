@@ -12,6 +12,7 @@ jobs:
       GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       TEMPLATE_REPOSITORY: ${{ github.repository }}
       ISSUE_BODY: ${{ github.event.issue.body }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Extrair dados da issue
         shell: bash
@@ -56,6 +57,17 @@ jobs:
             env_file.write(f"API_DESCRIPTION<<EOF\n{api_description}\nEOF\n")
           PY
 
+      - name: Comentar início da automação
+        shell: bash
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" \
+            --repo "${TEMPLATE_REPOSITORY}" \
+            --body-file - <<EOF
+          🚀 A automação de criação da API foi iniciada.
+
+          Acompanhe a execução aqui: ${RUN_URL}
+          EOF
+
       - name: Garantir nome único do repositório
         shell: bash
         run: |
@@ -75,6 +87,7 @@ jobs:
             --private \
             --template "${TEMPLATE_REPOSITORY}" \
             --clone
+          echo "PROJECT_CREATED=true" >> "$GITHUB_ENV"
 
       - name: Rodar script de rename
         shell: bash
@@ -96,12 +109,38 @@ jobs:
           rm -f rename-dotnet-project.sh
 
           git add .
-          git commit -m "chore: initialize ${PROJECT_NAME} from template" || echo "Nada para commitar"
+          git commit -m "chore: inicializa ${PROJECT_NAME} a partir do template" || echo "Nada para commitar"
           git push origin main
 
-      - name: Comentar na issue
+      - name: Comentar sucesso
+        if: success()
         shell: bash
         run: |
           gh issue comment "${{ github.event.issue.number }}" \
             --repo "${TEMPLATE_REPOSITORY}" \
-            --body "✅ O repositório **${PROJECT_NAME}** foi criado com sucesso: https://github.com/vyracare/${PROJECT_NAME}"
+            --body-file - <<EOF
+          ✅ A API **${PROJECT_NAME}** foi criada com sucesso.
+
+          Repositório: https://github.com/vyracare/${PROJECT_NAME}
+          Execução: ${RUN_URL}
+          EOF
+
+      - name: Rollback do repositório criado
+        if: failure() && env.PROJECT_CREATED == 'true'
+        shell: bash
+        run: |
+          gh repo delete "vyracare/${PROJECT_NAME}" --yes || true
+
+      - name: Comentar falha
+        if: failure()
+        shell: bash
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" \
+            --repo "${TEMPLATE_REPOSITORY}" \
+            --body-file - <<EOF
+          ❌ A automação falhou durante a criação da API.
+
+          Execução: ${RUN_URL}
+
+          Se um repositório chegou a ser criado nesta execução, a pipeline executou rollback para retornar ao estado inicial.
+          EOF

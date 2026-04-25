@@ -6,66 +6,35 @@ if [ "$#" -lt 3 ]; then
   exit 1
 fi
 
-REPO_NAME_RAW="$1"
-DATABASE_NAME_RAW="$2"
-TABLE_NAME_RAW="$3"
-API_DESCRIPTION="${API_DESCRIPTION:-}"
+export REPO_NAME_RAW="$1"
+export DATABASE_NAME_RAW="$2"
+export TABLE_NAME_RAW="$3"
+export API_DESCRIPTION="${API_DESCRIPTION:-}"
 
-normalize_kebab() {
-  echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g; s/-+/-/g'
-}
-
-normalize_snake() {
-  echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/_/g; s/^_+|_+$//g; s/_+/_/g'
-}
-
-to_pascal_case() {
-  local input="$1"
-  input="${input//-/ }"
-  input="${input//_/ }"
-
-  local result=""
-  for word in $input; do
-    local first="${word:0:1}"
-    local rest="${word:1}"
-    result+="${first^^}${rest,,}"
-  done
-  echo "$result"
-}
-
-REPO_NAME="$(normalize_kebab "$REPO_NAME_RAW")"
-if [[ "$REPO_NAME" != vyracare-api-* ]]; then
-  REPO_NAME="vyracare-api-${REPO_NAME}"
-fi
-
-DATABASE_NAME="$(normalize_snake "$DATABASE_NAME_RAW")"
-TABLE_NAME="$(normalize_snake "$TABLE_NAME_RAW")"
-TABLE_ROUTE="${TABLE_NAME//_/-}"
-API_SUFFIX="${REPO_NAME#vyracare-api-}"
-PROJECT_SUFFIX_PASCAL="$(to_pascal_case "$API_SUFFIX")"
-RESOURCE_NAME_PASCAL="$(to_pascal_case "$TABLE_NAME")"
-ASSEMBLY_NAME="Vyracare.Api.${PROJECT_SUFFIX_PASCAL}"
-PROJECT_FILE="${ASSEMBLY_NAME}.csproj"
-LAMBDA_FUNCTION_NAME="${REPO_NAME}-dev"
-
-export REPO_NAME DATABASE_NAME TABLE_NAME TABLE_ROUTE PROJECT_SUFFIX_PASCAL RESOURCE_NAME_PASCAL ASSEMBLY_NAME PROJECT_FILE LAMBDA_FUNCTION_NAME API_DESCRIPTION
-
-python <<'PY'
+python3 <<'PY'
 import os
+import re
 from pathlib import Path
 
-replacements = {
-    "[repo-generic]": os.environ["REPO_NAME"],
-    "[name-generic]": os.environ["PROJECT_SUFFIX_PASCAL"],
-    "[assembly-generic]": os.environ["ASSEMBLY_NAME"],
-    "[project-file-generic]": os.environ["PROJECT_FILE"],
-    "[database-generic]": os.environ["DATABASE_NAME"],
-    "[table-generic]": os.environ["TABLE_NAME"],
-    "[table-route-generic]": os.environ["TABLE_ROUTE"],
-    "[resource-generic]": os.environ["RESOURCE_NAME_PASCAL"],
-    "[lambda-name-generic]": os.environ["LAMBDA_FUNCTION_NAME"],
-    "[description-generic]": os.environ["API_DESCRIPTION"],
-}
+
+def normalize_kebab(value: str) -> str:
+    value = value.strip().lower()
+    value = re.sub(r"[^a-z0-9]+", "-", value)
+    value = re.sub(r"-{2,}", "-", value).strip("-")
+    return value
+
+
+def normalize_snake(value: str) -> str:
+    value = value.strip().lower()
+    value = re.sub(r"[^a-z0-9]+", "_", value)
+    value = re.sub(r"_{2,}", "_", value).strip("_")
+    return value
+
+
+def to_pascal_case(value: str) -> str:
+    words = re.split(r"[-_]+", value.strip())
+    return "".join(word[:1].upper() + word[1:].lower() for word in words if word)
+
 
 def read_text_with_fallback(path: Path) -> str | None:
     for encoding in ("utf-8", "utf-8-sig", "cp1252", "latin-1"):
@@ -75,22 +44,61 @@ def read_text_with_fallback(path: Path) -> str | None:
             continue
     return None
 
+
+repo_name = normalize_kebab(os.environ["REPO_NAME_RAW"])
+if not repo_name.startswith("vyracare-api-"):
+    repo_name = f"vyracare-api-{repo_name}"
+
+database_name = normalize_snake(os.environ["DATABASE_NAME_RAW"])
+table_name = normalize_snake(os.environ["TABLE_NAME_RAW"])
+table_route = table_name.replace("_", "-")
+api_suffix = repo_name.removeprefix("vyracare-api-")
+project_suffix_pascal = to_pascal_case(api_suffix)
+resource_name_pascal = to_pascal_case(table_name)
+assembly_name = f"Vyracare.Api.{project_suffix_pascal}"
+project_file = f"{assembly_name}.csproj"
+lambda_function_name = f"{repo_name}-dev"
+api_description = os.environ.get("API_DESCRIPTION", "")
+
+replacements = {
+    "[repo-generic]": repo_name,
+    "[name-generic]": project_suffix_pascal,
+    "[assembly-generic]": assembly_name,
+    "[project-file-generic]": project_file,
+    "[database-generic]": database_name,
+    "[table-generic]": table_name,
+    "[table-route-generic]": table_route,
+    "[resource-generic]": resource_name_pascal,
+    "[lambda-name-generic]": lambda_function_name,
+    "[description-generic]": api_description,
+}
+
 for path in Path(".").rglob("*"):
-    if path.is_file():
-        text = read_text_with_fallback(path)
-        if text is None:
-            continue
-        updated = text
-        for source, target in replacements.items():
-            updated = updated.replace(source, target)
-        if updated != text:
-            path.write_text(updated, encoding="utf-8")
+    if not path.is_file():
+        continue
+
+    text = read_text_with_fallback(path)
+    if text is None:
+        continue
+
+    updated = text
+    for source, target in replacements.items():
+        updated = updated.replace(source, target)
+
+    if updated != text:
+        path.write_text(updated, encoding="utf-8")
+
+renames = {
+    Path("Vyracare.Api.[name-generic].csproj"): Path(project_file),
+    Path("Controllers/[resource-generic]Controller.cs"): Path(f"Controllers/{resource_name_pascal}Controller.cs"),
+    Path("DTOS/[resource-generic]Dto.cs"): Path(f"DTOS/{resource_name_pascal}Dto.cs"),
+    Path("Models/[resource-generic]Model.cs"): Path(f"Models/{resource_name_pascal}Model.cs"),
+    Path("Services/[resource-generic]Service.cs"): Path(f"Services/{resource_name_pascal}Service.cs"),
+}
+
+for source, target in renames.items():
+    if source.exists():
+        source.rename(target)
+
+print(f"Projeto .NET renomeado com sucesso para {repo_name}")
 PY
-
-mv "Vyracare.Api.[name-generic].csproj" "${PROJECT_FILE}"
-mv "Controllers/[resource-generic]Controller.cs" "Controllers/${RESOURCE_NAME_PASCAL}Controller.cs"
-mv "DTOS/[resource-generic]Dto.cs" "DTOS/${RESOURCE_NAME_PASCAL}Dto.cs"
-mv "Models/[resource-generic]Model.cs" "Models/${RESOURCE_NAME_PASCAL}Model.cs"
-mv "Services/[resource-generic]Service.cs" "Services/${RESOURCE_NAME_PASCAL}Service.cs"
-
-echo "Projeto .NET renomeado com sucesso para ${REPO_NAME}"
