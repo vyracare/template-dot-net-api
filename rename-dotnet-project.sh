@@ -67,9 +67,19 @@ replacements = {
     "[description-generic]": os.environ["API_DESCRIPTION"],
 }
 
+def read_text_with_fallback(path: Path) -> str | None:
+    for encoding in ("utf-8", "utf-8-sig", "cp1252", "latin-1"):
+        try:
+            return path.read_text(encoding=encoding)
+        except UnicodeDecodeError:
+            continue
+    return None
+
 for path in Path(".").rglob("*"):
     if path.is_file():
-        text = path.read_text(encoding="utf-8")
+        text = read_text_with_fallback(path)
+        if text is None:
+            continue
         updated = text
         for source, target in replacements.items():
             updated = updated.replace(source, target)
