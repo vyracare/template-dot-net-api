@@ -81,7 +81,7 @@ jobs:
         run: |
           cd "${PROJECT_NAME}"
           chmod +x rename-dotnet-project.sh
-          ./rename-dotnet-project.sh "${PROJECT_NAME}" "${DATABASE_NAME}" "${TABLE_NAME}" "${API_DESCRIPTION}"
+          ./rename-dotnet-project.sh "${PROJECT_NAME}" "${DATABASE_NAME}" "${TABLE_NAME}"
 
       - name: Commit e push das mudanças
         shell: bash

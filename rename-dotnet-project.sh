@@ -1,15 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 
-if [ "$#" -lt 4 ]; then
-  echo "Uso: ./rename-dotnet-project.sh <repo-name> <database-name> <table-name> <api-description>"
+if [ "$#" -lt 3 ]; then
+  echo "Uso: ./rename-dotnet-project.sh <repo-name> <database-name> <table-name>"
   exit 1
 fi
 
 REPO_NAME_RAW="$1"
 DATABASE_NAME_RAW="$2"
 TABLE_NAME_RAW="$3"
-API_DESCRIPTION="$4"
+API_DESCRIPTION="${API_DESCRIPTION:-}"
 
 normalize_kebab() {
   echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g; s/-+/-/g'
