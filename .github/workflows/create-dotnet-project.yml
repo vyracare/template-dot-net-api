@@ -95,6 +95,11 @@ jobs:
             --public \
             --template "${TEMPLATE_REPOSITORY}" \
             --clone
+
+          gh repo edit "vyracare/${PROJECT_NAME}" \
+            --add-topic "back-end" \
+            --add-topic "projeto"
+
           echo "PROJECT_CREATED=true" >> "$GITHUB_ENV"
 
       - name: Rodar script de rename
@@ -132,6 +137,14 @@ jobs:
           Repositório: https://github.com/vyracare/${PROJECT_NAME}
           Execução: ${RUN_URL}
           EOF
+
+      - name: Fechar issue com sucesso
+        if: success()
+        shell: bash
+        run: |
+          gh issue close "${{ github.event.issue.number }}" \
+            --repo "${TEMPLATE_REPOSITORY}" \
+            --comment "✅ Issue encerrada automaticamente após a criação bem-sucedida da API."
 
       - name: Rollback do repositório criado
         id: rollback
