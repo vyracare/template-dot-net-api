@@ -13,6 +13,12 @@ Recursos iniciais:
   - CORS configurado por default para nao bloquear integracoes
   - Branch `develop` criada automaticamente a partir da `main`
   - Protecao basica habilitada em `main` e `develop`
+  - Configuracao opcional de MFE consumidor em `.vyracare/mfe-consumer.json`
+
+Integracao opcional com MFE:
+  - Informe o repositório do MFE no issue form apenas quando a API precisar atualizar automaticamente a URL consumida
+  - O template grava essa relacao no arquivo `.vyracare/mfe-consumer.json`
+  - A esteira generica usa esse arquivo para descobrir qual repositório de frontend deve ser atualizado
 
 Setup local:
   - Install .NET 8 SDK

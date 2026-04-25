@@ -1,0 +1,9 @@
+{
+  "consumerMfe": {
+    "repositoryFullName": "[consumer-mfe-full-name-generic]",
+    "environmentFiles": [
+      "src/environments/environments.ts"
+    ],
+    "apiUrlProperty": "apiUrl"
+  }
+}

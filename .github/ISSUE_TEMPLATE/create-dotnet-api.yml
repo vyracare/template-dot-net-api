@@ -38,3 +38,12 @@ body:
       placeholder: "API responsável por..."
     validations:
       required: true
+
+  - type: input
+    id: consumer-mfe-repository
+    attributes:
+      label: Repositório do MFE consumidor
+      description: "Opcional. Informe o repositório do MFE que consome a API. Ex.: vyracare/vyracare-app-user-mfe"
+      placeholder: "vyracare/vyracare-app-user-mfe"
+    validations:
+      required: false

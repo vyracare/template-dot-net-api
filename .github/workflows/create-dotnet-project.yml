@@ -31,6 +31,13 @@ jobs:
               raise SystemExit(f"Campo não encontrado na issue: {title}")
             return match.group(1).strip()
 
+          def extract_optional_field(title: str) -> str:
+            pattern = rf"### {re.escape(title)}\s*\n(.*?)(?=\n### |\Z)"
+            match = re.search(pattern, body, re.S)
+            if not match:
+              return ""
+            return match.group(1).strip()
+
           def normalize_kebab(value: str) -> str:
             value = value.strip().lower()
             value = re.sub(r"[^a-z0-9]+", "-", value)
@@ -45,15 +52,30 @@ jobs:
             value = re.sub(r"_{2,}", "_", value).strip("_")
             return value
 
+          def normalize_repo_full_name(value: str) -> str:
+            value = value.strip()
+            if not value:
+              return ""
+            if "/" in value:
+              owner, repo = value.split("/", 1)
+              repo = re.sub(r"[^a-z0-9]+", "-", repo.strip().lower())
+              repo = re.sub(r"-{2,}", "-", repo).strip("-")
+              return f"{owner.strip().lower()}/{repo}"
+            value = re.sub(r"[^a-z0-9]+", "-", value.strip().lower())
+            value = re.sub(r"-{2,}", "-", value).strip("-")
+            return f"vyracare/{value}"
+
           api_name = normalize_kebab(extract_field("Nome da API"))
           database_name = normalize_snake(extract_field("Nome do banco"))
           table_name = normalize_snake(extract_field("Nome da tabela ou collection"))
           api_description = extract_field("Descrição da API").replace("\r", " ").strip()
+          consumer_mfe_repository = normalize_repo_full_name(extract_optional_field("Repositório do MFE consumidor"))
 
           with open(env_path, "a", encoding="utf-8") as env_file:
             env_file.write(f"API_NAME={api_name}\n")
             env_file.write(f"DATABASE_NAME={database_name}\n")
             env_file.write(f"TABLE_NAME={table_name}\n")
+            env_file.write(f"CONSUMER_MFE_REPOSITORY={consumer_mfe_repository}\n")
             env_file.write(f"API_DESCRIPTION<<EOF\n{api_description}\nEOF\n")
           PY
 
@@ -108,6 +130,7 @@ jobs:
         run: |
           cd "${PROJECT_NAME}"
           chmod +x rename-dotnet-project.sh
+          export CONSUMER_MFE_REPOSITORY="${CONSUMER_MFE_REPOSITORY}"
           ./rename-dotnet-project.sh "${PROJECT_NAME}" "${DATABASE_NAME}" "${TABLE_NAME}"
 
       - name: Commit e push das mudanças

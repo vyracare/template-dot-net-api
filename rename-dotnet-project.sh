@@ -10,6 +10,7 @@ export REPO_NAME_RAW="$1"
 export DATABASE_NAME_RAW="$2"
 export TABLE_NAME_RAW="$3"
 export API_DESCRIPTION="${API_DESCRIPTION:-}"
+export CONSUMER_MFE_REPOSITORY_RAW="${CONSUMER_MFE_REPOSITORY:-}"
 
 python3 <<'PY'
 import os
@@ -29,6 +30,16 @@ def normalize_snake(value: str) -> str:
     value = re.sub(r"[^a-z0-9]+", "_", value)
     value = re.sub(r"_{2,}", "_", value).strip("_")
     return value
+
+
+def normalize_repo_full_name(value: str) -> str:
+    value = value.strip()
+    if not value:
+        return ""
+    if "/" in value:
+        owner, repo = value.split("/", 1)
+        return f"{owner.strip().lower()}/{normalize_kebab(repo)}"
+    return f"vyracare/{normalize_kebab(value)}"
 
 
 def to_pascal_case(value: str) -> str:
@@ -59,6 +70,7 @@ assembly_name = f"Vyracare.Api.{project_suffix_pascal}"
 project_file = f"{assembly_name}.csproj"
 lambda_function_name = f"{repo_name}-dev"
 api_description = os.environ.get("API_DESCRIPTION", "")
+consumer_mfe_repository = normalize_repo_full_name(os.environ.get("CONSUMER_MFE_REPOSITORY_RAW", ""))
 
 replacements = {
     "[repo-generic]": repo_name,
@@ -71,6 +83,7 @@ replacements = {
     "[resource-generic]": resource_name_pascal,
     "[lambda-name-generic]": lambda_function_name,
     "[description-generic]": api_description,
+    "[consumer-mfe-full-name-generic]": consumer_mfe_repository,
 }
 
 for path in Path(".").rglob("*"):
