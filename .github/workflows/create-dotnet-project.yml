@@ -97,6 +97,7 @@ jobs:
             --clone
 
           gh repo edit "vyracare/${PROJECT_NAME}" \
+            --description "${API_DESCRIPTION}" \
             --add-topic "back-end" \
             --add-topic "projeto"
 
