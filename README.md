@@ -11,6 +11,8 @@ Recursos iniciais:
   - Rotas base publicadas em `/api/[table-route-generic]`
   - Swagger habilitado em `/swagger/index.html`
   - CORS configurado por default para nao bloquear integracoes
+  - Branch `develop` criada automaticamente a partir da `main`
+  - Protecao basica habilitada em `main` e `develop`
 
 Setup local:
   - Install .NET 8 SDK

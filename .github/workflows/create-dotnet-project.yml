@@ -126,6 +126,39 @@ jobs:
           git commit -m "chore: inicializa ${PROJECT_NAME} a partir do template" || echo "Nada para commitar"
           git push origin main
 
+      - name: Criar branch develop
+        shell: bash
+        run: |
+          cd "${PROJECT_NAME}"
+          git checkout -b develop
+          git push origin develop
+          git checkout main
+
+      - name: Habilitar branch policy em main e develop
+        shell: bash
+        run: |
+          apply_protection() {
+            local branch_name="$1"
+
+            gh api \
+              --method PUT \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/vyracare/${PROJECT_NAME}/branches/${branch_name}/protection" \
+              -f required_status_checks= \
+              -F enforce_admins=false \
+              -f required_pull_request_reviews.dismiss_stale_reviews=true \
+              -f required_pull_request_reviews.require_code_owner_reviews=false \
+              -F required_pull_request_reviews.required_approving_review_count=1 \
+              -F required_conversation_resolution=true \
+              -F restrictions= \
+              -F allow_force_pushes=false \
+              -F allow_deletions=false \
+              -F block_creations=false
+          }
+
+          apply_protection "main"
+          apply_protection "develop"
+
       - name: Comentar sucesso
         if: success()
         shell: bash
