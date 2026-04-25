@@ -73,9 +73,17 @@ jobs:
         run: |
           PROJECT_NAME="${API_NAME}"
           if gh repo view "vyracare/${PROJECT_NAME}" >/dev/null 2>&1; then
-            TIMESTAMP=$(date +%Y%m%d%H%M%S)
-            PROJECT_NAME="${PROJECT_NAME}-${TIMESTAMP}"
-            echo "Repositório já existia. Novo nome: ${PROJECT_NAME}"
+            echo "FAILURE_REASON=Já existe um repositório com o nome ${PROJECT_NAME}." >> "$GITHUB_ENV"
+
+            gh issue comment "${{ github.event.issue.number }}" \
+              --repo "${TEMPLATE_REPOSITORY}" \
+              --body-file - <<EOF
+          ⚠️ A automação foi interrompida porque o repositório **${PROJECT_NAME}** já existe.
+
+          Execução: ${RUN_URL}
+          EOF
+
+            exit 1
           fi
 
           echo "PROJECT_NAME=${PROJECT_NAME}" >> "$GITHUB_ENV"
@@ -84,7 +92,7 @@ jobs:
         shell: bash
         run: |
           gh repo create "vyracare/${PROJECT_NAME}" \
-            --private \
+            --public \
             --template "${TEMPLATE_REPOSITORY}" \
             --clone
           echo "PROJECT_CREATED=true" >> "$GITHUB_ENV"
@@ -126,21 +134,37 @@ jobs:
           EOF
 
       - name: Rollback do repositório criado
+        id: rollback
         if: failure() && env.PROJECT_CREATED == 'true'
+        continue-on-error: true
         shell: bash
         run: |
-          gh repo delete "vyracare/${PROJECT_NAME}" --yes || true
+          if gh repo delete "vyracare/${PROJECT_NAME}" --yes; then
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=failed" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Comentar falha
         if: failure()
         shell: bash
         run: |
+          ROLLBACK_MESSAGE="Nenhum repositório precisou ser removido."
+          if [ "${PROJECT_CREATED:-false}" = "true" ] && [ "${{ steps.rollback.outputs.status }}" = "success" ]; then
+            ROLLBACK_MESSAGE="O rollback removeu o repositório criado e retornou o contexto ao estado inicial."
+          elif [ "${PROJECT_CREATED:-false}" = "true" ] && [ "${{ steps.rollback.outputs.status }}" = "failed" ]; then
+            ROLLBACK_MESSAGE="O rollback foi iniciado, mas a exclusão do repositório falhou. Verifique se o token PAT_TOKEN possui o escopo delete_repo."
+          fi
+
+          FAILURE_DETAILS="${FAILURE_REASON:-Falha durante a execução da automação.}"
+
           gh issue comment "${{ github.event.issue.number }}" \
             --repo "${TEMPLATE_REPOSITORY}" \
             --body-file - <<EOF
           ❌ A automação falhou durante a criação da API.
 
           Execução: ${RUN_URL}
+          Motivo: ${FAILURE_DETAILS}
 
-          Se um repositório chegou a ser criado nesta execução, a pipeline executou rollback para retornar ao estado inicial.
+          ${ROLLBACK_MESSAGE}
           EOF

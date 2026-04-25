@@ -77,6 +77,9 @@ for path in Path(".").rglob("*"):
     if not path.is_file():
         continue
 
+    if ".git" in path.parts:
+        continue
+
     text = read_text_with_fallback(path)
     if text is None:
         continue
