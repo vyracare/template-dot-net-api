@@ -1,0 +1,107 @@
+name: Create Project .NET API
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-repo:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.body, '### Nome da API')
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+      TEMPLATE_REPOSITORY: ${{ github.repository }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+    steps:
+      - name: Extrair dados da issue
+        shell: bash
+        run: |
+          python <<'PY'
+          import os
+          import re
+
+          body = os.environ["ISSUE_BODY"]
+          env_path = os.environ["GITHUB_ENV"]
+
+          def extract_field(title: str) -> str:
+            pattern = rf"### {re.escape(title)}\s*\n(.*?)(?=\n### |\Z)"
+            match = re.search(pattern, body, re.S)
+            if not match:
+              raise SystemExit(f"Campo não encontrado na issue: {title}")
+            return match.group(1).strip()
+
+          def normalize_kebab(value: str) -> str:
+            value = value.strip().lower()
+            value = re.sub(r"[^a-z0-9]+", "-", value)
+            value = re.sub(r"-{2,}", "-", value).strip("-")
+            if not value.startswith("vyracare-api-"):
+              value = f"vyracare-api-{value}"
+            return value
+
+          def normalize_snake(value: str) -> str:
+            value = value.strip().lower()
+            value = re.sub(r"[^a-z0-9]+", "_", value)
+            value = re.sub(r"_{2,}", "_", value).strip("_")
+            return value
+
+          api_name = normalize_kebab(extract_field("Nome da API"))
+          database_name = normalize_snake(extract_field("Nome do banco"))
+          table_name = normalize_snake(extract_field("Nome da tabela ou collection"))
+          api_description = extract_field("Descrição da API").replace("\r", " ").strip()
+
+          with open(env_path, "a", encoding="utf-8") as env_file:
+            env_file.write(f"API_NAME={api_name}\n")
+            env_file.write(f"DATABASE_NAME={database_name}\n")
+            env_file.write(f"TABLE_NAME={table_name}\n")
+            env_file.write(f"API_DESCRIPTION<<EOF\n{api_description}\nEOF\n")
+          PY
+
+      - name: Garantir nome único do repositório
+        shell: bash
+        run: |
+          PROJECT_NAME="${API_NAME}"
+          if gh repo view "vyracare/${PROJECT_NAME}" >/dev/null 2>&1; then
+            TIMESTAMP=$(date +%Y%m%d%H%M%S)
+            PROJECT_NAME="${PROJECT_NAME}-${TIMESTAMP}"
+            echo "Repositório já existia. Novo nome: ${PROJECT_NAME}"
+          fi
+
+          echo "PROJECT_NAME=${PROJECT_NAME}" >> "$GITHUB_ENV"
+
+      - name: Criar repositório a partir do template
+        shell: bash
+        run: |
+          gh repo create "vyracare/${PROJECT_NAME}" \
+            --private \
+            --template "${TEMPLATE_REPOSITORY}" \
+            --clone
+
+      - name: Rodar script de rename
+        shell: bash
+        run: |
+          cd "${PROJECT_NAME}"
+          chmod +x rename-dotnet-project.sh
+          ./rename-dotnet-project.sh "${PROJECT_NAME}" "${DATABASE_NAME}" "${TABLE_NAME}" "${API_DESCRIPTION}"
+
+      - name: Commit e push das mudanças
+        shell: bash
+        run: |
+          cd "${PROJECT_NAME}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/vyracare/${PROJECT_NAME}.git"
+
+          rm -rf .github/ISSUE_TEMPLATE
+          rm -f .github/workflows/create-dotnet-project.yml
+          rm -f rename-dotnet-project.sh
+
+          git add .
+          git commit -m "chore: initialize ${PROJECT_NAME} from template" || echo "Nada para commitar"
+          git push origin main
+
+      - name: Comentar na issue
+        shell: bash
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" \
+            --repo "${TEMPLATE_REPOSITORY}" \
+            --body "✅ O repositório **${PROJECT_NAME}** foi criado com sucesso: https://github.com/vyracare/${PROJECT_NAME}"

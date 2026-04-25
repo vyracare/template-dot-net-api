@@ -1,0 +1,40 @@
+name: "Criar API .NET"
+description: "Cria uma nova API .NET baseada no template Vyracare"
+title: "[create-api] nova api dotnet"
+labels: ["automation", "dotnet", "api"]
+body:
+  - type: input
+    id: api-name
+    attributes:
+      label: Nome da API
+      description: "Informe o nome do repositório da API. Pode ser apenas o sufixo ou o nome completo em kebab-case."
+      placeholder: "vyracare-api-catalog"
+    validations:
+      required: true
+
+  - type: input
+    id: database-name
+    attributes:
+      label: Nome do banco
+      description: "Nome do banco/Database que será configurado no appsettings."
+      placeholder: "vyracare_catalog_db"
+    validations:
+      required: true
+
+  - type: input
+    id: table-name
+    attributes:
+      label: Nome da tabela ou collection
+      description: "Nome da tabela/collection principal usada pela API."
+      placeholder: "catalog_items"
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-description
+    attributes:
+      label: Descrição da API
+      description: "Descreva rapidamente a finalidade da nova API."
+      placeholder: "API responsável por..."
+    validations:
+      required: true

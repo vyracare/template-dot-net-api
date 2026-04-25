@@ -1,0 +1,44 @@
+name: PUBLISH
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  cd-dot-net:
+    uses: vyracare/vyracare-infra-pipes-dot-net/.github/workflows/cd-generic-dot-net.yml@main
+    with:
+      branch-name: ${{ github.ref_name }}
+      backend-repo: ${{ github.repository }}
+      project-path: [project-file-generic]
+      output-dir: backend-publish
+      api-gateway-name: [repo-generic]
+      lambda-function-name: [lambda-name-generic]
+      lambda-handler: [assembly-generic]
+      route-base-path: api/[table-route-generic]
+    secrets: inherit
+
+  open-pr-main:
+    name: Open Pull Request to main
+    runs-on: ubuntu-latest
+    needs: cd-dot-net
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Open Pull Request to main
+        uses: repo-sync/pull-request@v2
+        with:
+          github_token: ${{ secrets.PAT_TOKEN }}
+          source_branch: develop
+          destination_branch: main
+          pr_title: "🚀 Merge develop into main (Auto PR via Pipeline)"
+          pr_body: |
+            PR automática criada pelo workflow **PUBLISH**.
+            Branch de origem: `develop`
+            Destino: `main`
+
+            ✅ CD executado com sucesso no repositório de infra.
+            🧩 Iniciado por: ${{ github.actor }}
