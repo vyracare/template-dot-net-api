@@ -11,12 +11,12 @@ jobs:
     with:
       branch-name: ${{ github.ref_name }}
       backend-repo: ${{ github.repository }}
-      project-path: [project-file-generic]
+      project-path: "[project-file-generic]"
       output-dir: backend-publish
-      api-gateway-name: [repo-generic]
-      lambda-function-name: [lambda-name-generic]
-      lambda-handler: [assembly-generic]
-      route-base-path: api/[table-route-generic]
+      api-gateway-name: "[repo-generic]"
+      lambda-function-name: "[lambda-name-generic]"
+      lambda-handler: "[assembly-generic]"
+      route-base-path: "api/[table-route-generic]"
     secrets: inherit
 
   open-pr-main:
