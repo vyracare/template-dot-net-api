@@ -111,6 +111,5 @@ app.UseCors("DefaultCors");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers().RequireAuthorization();
-app.MapGet("/health", () => Results.Ok(new { status = "ok", api = "[repo-generic]" })).RequireAuthorization();
 
 app.Run();
