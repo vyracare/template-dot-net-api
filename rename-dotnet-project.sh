@@ -108,6 +108,9 @@ for path in Path(".").rglob("*"):
     if ".git" in path.parts:
         continue
 
+    if path.name == "rename-dotnet-project.sh":
+        continue
+
     text = read_text_with_fallback(path)
     if text is None:
         continue

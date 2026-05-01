@@ -28,7 +28,7 @@ jobs:
             pattern = rf"### {re.escape(title)}\s*\n(.*?)(?=\n### |\Z)"
             match = re.search(pattern, body, re.S)
             if not match:
-              raise SystemExit(f"Campo não encontrado na issue: {title}")
+              raise SystemExit(f"Campo nao encontrado na issue: {title}")
             return match.group(1).strip()
 
           def extract_optional_field(title: str) -> str:
@@ -86,33 +86,34 @@ jobs:
             env_file.write(f"JWT_ISSUER={jwt_issuer}\n")
             env_file.write(f"JWT_AUDIENCE={jwt_audience}\n")
             env_file.write(f"JWT_EXPIRY_MINUTES={jwt_expiry_minutes}\n")
+            env_file.write("PROJECT_CREATED=false\n")
             env_file.write(f"API_DESCRIPTION<<EOF\n{api_description}\nEOF\n")
           PY
 
-      - name: Comentar início da automação
+      - name: Comentar inicio da automacao
         shell: bash
         run: |
           gh issue comment "${{ github.event.issue.number }}" \
             --repo "${TEMPLATE_REPOSITORY}" \
             --body-file - <<EOF
-          🚀 A automação de criação da API foi iniciada.
+          A automacao de criacao da API foi iniciada.
 
-          Acompanhe a execução aqui: ${RUN_URL}
+          Acompanhe a execucao aqui: ${RUN_URL}
           EOF
 
-      - name: Garantir nome único do repositório
+      - name: Garantir nome unico do repositorio
         shell: bash
         run: |
           PROJECT_NAME="${API_NAME}"
           if gh repo view "vyracare/${PROJECT_NAME}" >/dev/null 2>&1; then
-            echo "FAILURE_REASON=Já existe um repositório com o nome ${PROJECT_NAME}." >> "$GITHUB_ENV"
+            echo "FAILURE_REASON=Ja existe um repositorio com o nome ${PROJECT_NAME}." >> "$GITHUB_ENV"
 
             gh issue comment "${{ github.event.issue.number }}" \
               --repo "${TEMPLATE_REPOSITORY}" \
               --body-file - <<EOF
-          ⚠️ A automação foi interrompida porque o repositório **${PROJECT_NAME}** já existe.
+          A automacao foi interrompida porque o repositorio **${PROJECT_NAME}** ja existe.
 
-          Execução: ${RUN_URL}
+          Execucao: ${RUN_URL}
           EOF
 
             exit 1
@@ -120,7 +121,7 @@ jobs:
 
           echo "PROJECT_NAME=${PROJECT_NAME}" >> "$GITHUB_ENV"
 
-      - name: Criar repositório a partir do template
+      - name: Criar repositorio a partir do template
         shell: bash
         run: |
           gh repo create "vyracare/${PROJECT_NAME}" \
@@ -148,7 +149,7 @@ jobs:
           export JWT_EXPIRY_MINUTES="${JWT_EXPIRY_MINUTES}"
           ./rename-dotnet-project.sh "${PROJECT_NAME}" "${DATABASE_NAME}" "${TABLE_NAME}"
 
-      - name: Commit e push das mudanças
+      - name: Commit e push das mudancas
         shell: bash
         run: |
           cd "${PROJECT_NAME}"
@@ -204,10 +205,10 @@ jobs:
           gh issue comment "${{ github.event.issue.number }}" \
             --repo "${TEMPLATE_REPOSITORY}" \
             --body-file - <<EOF
-          ✅ A API **${PROJECT_NAME}** foi criada com sucesso.
+          A API **${PROJECT_NAME}** foi criada com sucesso.
 
-          Repositório: https://github.com/vyracare/${PROJECT_NAME}
-          Execução: ${RUN_URL}
+          Repositorio: https://github.com/vyracare/${PROJECT_NAME}
+          Execucao: ${RUN_URL}
           EOF
 
       - name: Fechar issue com sucesso
@@ -216,9 +217,9 @@ jobs:
         run: |
           gh issue close "${{ github.event.issue.number }}" \
             --repo "${TEMPLATE_REPOSITORY}" \
-            --comment "✅ Issue encerrada automaticamente após a criação bem-sucedida da API."
+            --comment "Issue encerrada automaticamente apos a criacao bem-sucedida da API."
 
-      - name: Rollback do repositório criado
+      - name: Rollback do repositorio criado
         id: rollback
         if: failure() && env.PROJECT_CREATED == 'true'
         continue-on-error: true
@@ -234,22 +235,30 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          ROLLBACK_MESSAGE="Nenhum repositório precisou ser removido."
+          ROLLBACK_MESSAGE="Nenhum repositorio precisou ser removido."
           if [ "${PROJECT_CREATED:-false}" = "true" ] && [ "${{ steps.rollback.outputs.status }}" = "success" ]; then
-            ROLLBACK_MESSAGE="O rollback removeu o repositório criado e retornou o contexto ao estado inicial."
+            ROLLBACK_MESSAGE="O rollback removeu o repositorio criado e retornou o contexto ao estado inicial."
           elif [ "${PROJECT_CREATED:-false}" = "true" ] && [ "${{ steps.rollback.outputs.status }}" = "failed" ]; then
-            ROLLBACK_MESSAGE="O rollback foi iniciado, mas a exclusão do repositório falhou. Verifique se o token PAT_TOKEN possui o escopo delete_repo."
+            ROLLBACK_MESSAGE="O rollback foi iniciado, mas a exclusao do repositorio falhou. Verifique se o token PAT_TOKEN possui o escopo delete_repo."
           fi
 
-          FAILURE_DETAILS="${FAILURE_REASON:-Falha durante a execução da automação.}"
+          FAILURE_DETAILS="${FAILURE_REASON:-Falha durante a execucao da automacao.}"
 
           gh issue comment "${{ github.event.issue.number }}" \
             --repo "${TEMPLATE_REPOSITORY}" \
             --body-file - <<EOF
-          ❌ A automação falhou durante a criação da API.
+          A automacao falhou durante a criacao da API.
 
-          Execução: ${RUN_URL}
+          Execucao: ${RUN_URL}
           Motivo: ${FAILURE_DETAILS}
 
           ${ROLLBACK_MESSAGE}
           EOF
+
+      - name: Fechar issue com falha
+        if: failure()
+        shell: bash
+        run: |
+          gh issue close "${{ github.event.issue.number }}" \
+            --repo "${TEMPLATE_REPOSITORY}" \
+            --comment "Issue encerrada automaticamente apos falha na criacao da API. Verifique o comentario anterior para o motivo e o status do rollback."
