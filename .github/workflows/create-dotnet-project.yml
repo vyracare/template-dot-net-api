@@ -70,12 +70,22 @@ jobs:
           table_name = normalize_snake(extract_field("Nome da tabela ou collection"))
           api_description = extract_field("Descrição da API").replace("\r", " ").strip()
           consumer_mfe_repository = normalize_repo_full_name(extract_optional_field("Repositório do MFE consumidor"))
+          mongo_connection_string = extract_optional_field("Mongo Connection String").replace("\r", " ").strip()
+          jwt_key = extract_optional_field("JWT Key").replace("\r", " ").strip()
+          jwt_issuer = extract_optional_field("JWT Issuer").replace("\r", " ").strip()
+          jwt_audience = extract_optional_field("JWT Audience").replace("\r", " ").strip()
+          jwt_expiry_minutes = extract_optional_field("JWT Expiry Minutes").replace("\r", " ").strip()
 
           with open(env_path, "a", encoding="utf-8") as env_file:
             env_file.write(f"API_NAME={api_name}\n")
             env_file.write(f"DATABASE_NAME={database_name}\n")
             env_file.write(f"TABLE_NAME={table_name}\n")
             env_file.write(f"CONSUMER_MFE_REPOSITORY={consumer_mfe_repository}\n")
+            env_file.write(f"MONGO_CONNECTION_STRING={mongo_connection_string}\n")
+            env_file.write(f"JWT_KEY={jwt_key}\n")
+            env_file.write(f"JWT_ISSUER={jwt_issuer}\n")
+            env_file.write(f"JWT_AUDIENCE={jwt_audience}\n")
+            env_file.write(f"JWT_EXPIRY_MINUTES={jwt_expiry_minutes}\n")
             env_file.write(f"API_DESCRIPTION<<EOF\n{api_description}\nEOF\n")
           PY
 
@@ -131,6 +141,11 @@ jobs:
           cd "${PROJECT_NAME}"
           chmod +x rename-dotnet-project.sh
           export CONSUMER_MFE_REPOSITORY="${CONSUMER_MFE_REPOSITORY}"
+          export MONGO_CONNECTION_STRING="${MONGO_CONNECTION_STRING}"
+          export JWT_KEY="${JWT_KEY}"
+          export JWT_ISSUER="${JWT_ISSUER}"
+          export JWT_AUDIENCE="${JWT_AUDIENCE}"
+          export JWT_EXPIRY_MINUTES="${JWT_EXPIRY_MINUTES}"
           ./rename-dotnet-project.sh "${PROJECT_NAME}" "${DATABASE_NAME}" "${TABLE_NAME}"
 
       - name: Commit e push das mudanças

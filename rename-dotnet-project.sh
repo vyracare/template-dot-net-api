@@ -11,6 +11,11 @@ export DATABASE_NAME_RAW="$2"
 export TABLE_NAME_RAW="$3"
 export API_DESCRIPTION="${API_DESCRIPTION:-}"
 export CONSUMER_MFE_REPOSITORY_RAW="${CONSUMER_MFE_REPOSITORY:-}"
+export MONGO_CONNECTION_STRING_RAW="${MONGO_CONNECTION_STRING:-}"
+export JWT_KEY_RAW="${JWT_KEY:-}"
+export JWT_ISSUER_RAW="${JWT_ISSUER:-}"
+export JWT_AUDIENCE_RAW="${JWT_AUDIENCE:-}"
+export JWT_EXPIRY_MINUTES_RAW="${JWT_EXPIRY_MINUTES:-}"
 
 python3 <<'PY'
 import os
@@ -71,6 +76,11 @@ project_file = f"{assembly_name}.csproj"
 lambda_function_name = f"{repo_name}-dev"
 api_description = os.environ.get("API_DESCRIPTION", "")
 consumer_mfe_repository = normalize_repo_full_name(os.environ.get("CONSUMER_MFE_REPOSITORY_RAW", ""))
+mongo_connection_string = os.environ.get("MONGO_CONNECTION_STRING_RAW", "").strip() or "[mongo-connection-string-generic]"
+jwt_key = os.environ.get("JWT_KEY_RAW", "").strip() or "[jwt-key-generic]"
+jwt_issuer = os.environ.get("JWT_ISSUER_RAW", "").strip() or "[jwt-issuer-generic]"
+jwt_audience = os.environ.get("JWT_AUDIENCE_RAW", "").strip() or "[jwt-audience-generic]"
+jwt_expiry_minutes = os.environ.get("JWT_EXPIRY_MINUTES_RAW", "").strip() or "[jwt-expiry-minutes-generic]"
 
 replacements = {
     "[repo-generic]": repo_name,
@@ -84,6 +94,11 @@ replacements = {
     "[lambda-name-generic]": lambda_function_name,
     "[description-generic]": api_description,
     "[consumer-mfe-full-name-generic]": consumer_mfe_repository,
+    "[mongo-connection-string-generic]": mongo_connection_string,
+    "[jwt-key-generic]": jwt_key,
+    "[jwt-issuer-generic]": jwt_issuer,
+    "[jwt-audience-generic]": jwt_audience,
+    "[jwt-expiry-minutes-generic]": jwt_expiry_minutes,
 }
 
 for path in Path(".").rglob("*"):

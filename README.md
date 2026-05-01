@@ -11,6 +11,7 @@ Recursos iniciais:
   - Rotas base publicadas em `/api/[table-route-generic]`
   - Swagger habilitado em `/swagger/index.html`
   - CORS configurado por default para nao bloquear integracoes
+  - JWT obrigatorio em todos os endpoints da API
   - Branch `develop` criada automaticamente a partir da `main`
   - Protecao basica habilitada em `main` e `develop`
   - Configuracao opcional de MFE consumidor em `.vyracare/mfe-consumer.json`
@@ -32,3 +33,4 @@ To publish:
   - `dotnet publish -c Release -o ./publish`
   - Configure o secret `MONGO_URI` no repositório para o deploy da Lambda acessar o banco real
   - Opcionalmente configure `CORS_ALLOWED_ORIGINS` para sobrescrever os domínios permitidos
+  - Opcionalmente configure `JWT_KEY`, `JWT_ISSUER` e `JWT_AUDIENCE` para sobrescrever os valores versionados

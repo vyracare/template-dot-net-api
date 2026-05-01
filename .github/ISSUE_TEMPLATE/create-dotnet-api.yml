@@ -17,9 +17,18 @@ body:
     attributes:
       label: Nome do banco
       description: "Nome do banco/Database que será configurado no appsettings."
-      placeholder: "vyracare_catalog_db"
+      placeholder: "vyracare_db"
     validations:
       required: true
+
+  - type: input
+    id: mongo-connection-string
+    attributes:
+      label: Mongo Connection String
+      description: "Opcional. String de conexão do MongoDB para já gerar o appsettings configurado."
+      placeholder: "mongodb+srv://usuario:senha@cluster.mongodb.net/?retryWrites=true&w=majority"
+    validations:
+      required: false
 
   - type: input
     id: table-name
@@ -38,6 +47,42 @@ body:
       placeholder: "API responsável por..."
     validations:
       required: true
+
+  - type: input
+    id: jwt-key
+    attributes:
+      label: JWT Key
+      description: "Opcional. Chave JWT da API."
+      placeholder: "sQAn6C4A9uMUjbXVvXGVdrHQVxYKo57x2WxEgmSFQBY="
+    validations:
+      required: false
+
+  - type: input
+    id: jwt-issuer
+    attributes:
+      label: JWT Issuer
+      description: "Opcional. Issuer JWT da API."
+      placeholder: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_xxxxx"
+    validations:
+      required: false
+
+  - type: input
+    id: jwt-audience
+    attributes:
+      label: JWT Audience
+      description: "Opcional. Audience JWT da API."
+      placeholder: "424aitrab2nma4ttgi0314dfst"
+    validations:
+      required: false
+
+  - type: input
+    id: jwt-expiry-minutes
+    attributes:
+      label: JWT Expiry Minutes
+      description: "Opcional. Tempo de expiração do token em minutos."
+      placeholder: "60"
+    validations:
+      required: false
 
   - type: input
     id: consumer-mfe-repository
