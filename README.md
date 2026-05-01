@@ -30,3 +30,5 @@ Setup local:
 
 To publish:
   - `dotnet publish -c Release -o ./publish`
+  - Configure o secret `MONGO_URI` no repositório para o deploy da Lambda acessar o banco real
+  - Opcionalmente configure `CORS_ALLOWED_ORIGINS` para sobrescrever os domínios permitidos
