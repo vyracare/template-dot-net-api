@@ -183,16 +183,25 @@ jobs:
               --method PUT \
               -H "Accept: application/vnd.github+json" \
               "/repos/vyracare/${PROJECT_NAME}/branches/${branch_name}/protection" \
-              -f required_status_checks= \
-              -F enforce_admins=false \
-              -f required_pull_request_reviews.dismiss_stale_reviews=true \
-              -f required_pull_request_reviews.require_code_owner_reviews=false \
-              -F required_pull_request_reviews.required_approving_review_count=1 \
-              -F required_conversation_resolution=true \
-              -F restrictions= \
-              -F allow_force_pushes=false \
-              -F allow_deletions=false \
-              -F block_creations=false
+              --input - <<EOF
+          {
+            "required_status_checks": null,
+            "enforce_admins": false,
+            "required_pull_request_reviews": {
+              "dismiss_stale_reviews": true,
+              "require_code_owner_reviews": false,
+              "required_approving_review_count": 1
+            },
+            "restrictions": null,
+            "required_conversation_resolution": true,
+            "allow_force_pushes": false,
+            "allow_deletions": false,
+            "block_creations": false,
+            "required_linear_history": false,
+            "lock_branch": false,
+            "allow_fork_syncing": false
+          }
+          EOF
           }
 
           apply_protection "main"
