@@ -41,7 +41,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "[description-generic]"
     });
 });
-builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 builder.Services.AddScoped<[resource-generic]Service>();
 
