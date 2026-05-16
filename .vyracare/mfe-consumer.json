@@ -4,6 +4,7 @@
     "environmentFiles": [
       "src/environments/environments.ts"
     ],
-    "apiUrlProperty": "apiUrl"
+    "apiUrlProperty": "apiUrl",
+    "environmentProperties": {}
   }
 }
