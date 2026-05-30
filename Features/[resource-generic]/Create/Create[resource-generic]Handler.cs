@@ -5,6 +5,9 @@ using [assembly-generic].Features.[resource-generic].Shared.Ports;
 
 namespace [assembly-generic].Features.[resource-generic].Create;
 
+/// <summary>
+/// Implementa a regra de neg?cio do caso de uso representado por esta pasta.
+/// </summary>
 public sealed class Create[resource-generic]Handler
 {
     private readonly I[resource-generic]Repository _repository;

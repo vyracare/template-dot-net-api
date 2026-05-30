@@ -3,6 +3,9 @@ using [assembly-generic].Common.Results;
 
 namespace [assembly-generic].Common.Http;
 
+/// <summary>
+/// Centraliza extens?es reutiliz?veis usadas pela aplica??o.
+/// </summary>
 public static class ControllerBaseExtensions
 {
     public static IActionResult ToActionResult<T>(

@@ -5,6 +5,9 @@ using [assembly-generic].Infrastructure.Persistence.Documents;
 
 namespace [assembly-generic].Infrastructure.Persistence;
 
+/// <summary>
+/// Implementa a integra??o com a persist?ncia ou com uma depend?ncia externa da aplica??o.
+/// </summary>
 public sealed class Mongo[resource-generic]Repository : I[resource-generic]Repository
 {
     private readonly IMongoCollection<[resource-generic]Document> _collection;

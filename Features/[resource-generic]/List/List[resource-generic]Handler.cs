@@ -4,6 +4,9 @@ using [assembly-generic].Features.[resource-generic].Shared.Ports;
 
 namespace [assembly-generic].Features.[resource-generic].List;
 
+/// <summary>
+/// Implementa a regra de neg?cio do caso de uso representado por esta pasta.
+/// </summary>
 public sealed class List[resource-generic]Handler
 {
     private readonly I[resource-generic]Repository _repository;

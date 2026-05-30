@@ -5,9 +5,15 @@ using [assembly-generic].Features.[resource-generic].Shared.Ports;
 
 namespace [assembly-generic].Tests.[resource-generic].GetById;
 
+/// <summary>
+/// Agrupa os cen?rios de teste unit?rio relacionados a este componente.
+/// </summary>
 public sealed class Get[resource-generic]ByIdHandlerTests
 {
     [Fact]
+/// <summary>
+/// Executa a responsabilidade associada a d ev e r et or na r n ot f ou nd q ua nd o r ec ur so n ao e xi st ir.
+/// </summary>
     public async Task Deve_retornar_not_found_quando_recurso_nao_existir()
     {
         var handler = new Get[resource-generic]ByIdHandler(new FakeRepository());
@@ -19,6 +25,9 @@ public sealed class Get[resource-generic]ByIdHandlerTests
     }
 
     [Fact]
+/// <summary>
+/// Executa a responsabilidade associada a d ev e r et or na r r ec ur so q ua nd o i de nt if ic ad or e xi st ir.
+/// </summary>
     public async Task Deve_retornar_recurso_quando_identificador_existir()
     {
         var repository = new FakeRepository();

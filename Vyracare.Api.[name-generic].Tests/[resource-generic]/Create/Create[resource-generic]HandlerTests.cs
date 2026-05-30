@@ -6,9 +6,15 @@ using [assembly-generic].Features.[resource-generic].Shared.Ports;
 
 namespace [assembly-generic].Tests.[resource-generic].Create;
 
+/// <summary>
+/// Agrupa os cen?rios de teste unit?rio relacionados a este componente.
+/// </summary>
 public sealed class Create[resource-generic]HandlerTests
 {
     [Fact]
+/// <summary>
+/// Executa a responsabilidade associada a d ev e r et or na r v al id ac ao q ua nd o n om e n ao f or i nf or ma do.
+/// </summary>
     public async Task Deve_retornar_validacao_quando_nome_nao_for_informado()
     {
         var handler = new Create[resource-generic]Handler(new FakeRepository(), new FixedClock());
@@ -20,6 +26,9 @@ public sealed class Create[resource-generic]HandlerTests
     }
 
     [Fact]
+/// <summary>
+/// Executa a responsabilidade associada a d ev e c ri ar r ec ur so q ua nd o p ay lo ad f or v al id o.
+/// </summary>
     public async Task Deve_criar_recurso_quando_payload_for_valido()
     {
         var repository = new FakeRepository();

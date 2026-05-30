@@ -11,8 +11,14 @@ using [assembly-generic].Infrastructure.Time;
 
 namespace [assembly-generic].Infrastructure.DependencyInjection;
 
+/// <summary>
+/// Centraliza extens?es reutiliz?veis usadas pela aplica??o.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+/// <summary>
+/// Registra os servi?os necess?rios para conectar a aplica??o ao MongoDB.
+/// </summary>
     public static IServiceCollection AddMongo(this IServiceCollection services)
     {
         services.AddSingleton<IMongoClient>(sp =>
@@ -30,6 +36,9 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+/// <summary>
+/// Registra os handlers, portas e servi?os centrais da aplica??o no container de depend?ncias.
+/// </summary>
     public static IServiceCollection AddApplicationCore(this IServiceCollection services)
     {
         services.AddSingleton<IClock, SystemClock>();
