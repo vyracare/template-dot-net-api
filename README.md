@@ -1,37 +1,91 @@
-[repo-generic] (.NET 8) - MongoDB + AWS Lambda
------------------------------------------------
+# template-dot-net-api
 
-Descricao:
-  - [description-generic]
+Template base para criar novas APIs .NET 8 da Vyracare com arquitetura padronizada, seguranca alinhada com AWS Secrets Manager e camada inicial de testes unitarios.
 
-Recursos iniciais:
-  - Projeto .NET 8 preparado para AWS Lambda
-  - MongoDB configurado com database `[database-generic]`
-  - Controller inicial para a collection `[table-generic]`
-  - Rotas base publicadas em `/api/[table-route-generic]`
-  - Swagger habilitado em `/swagger/index.html`
-  - CORS configurado por default para nao bloquear integracoes
-  - JWT obrigatorio em todos os endpoints da API
-  - Branch `develop` criada automaticamente a partir da `main`
-  - Protecao basica habilitada em `main` e `develop`
-  - Configuracao opcional de MFE consumidor em `.vyracare/mfe-consumer.json`
+## Estrutura gerada
 
-Integracao opcional com MFE:
-  - Informe o repositório do MFE no issue form apenas quando a API precisar atualizar automaticamente a URL consumida
-  - O template grava essa relacao no arquivo `.vyracare/mfe-consumer.json`
-  - A esteira generica usa esse arquivo para descobrir qual repositório de frontend deve ser atualizado
+O template agora nasce em um modelo pragmatico de `vertical slice`.
 
-Setup local:
-  - Install .NET 8 SDK
-  - Configure `dotnet user-secrets` ou use as env vars `MONGO_URI` e `JWT_KEY`
-  - Ajuste `Cors:AllowedOrigins` caso queira restringir origens
-  - `dotnet restore`
-  - `dotnet build`
-  - `dotnet run`
+- `Features/<Recurso>/Create`
+  Caso de uso de criacao.
+- `Features/<Recurso>/List`
+  Caso de uso de listagem.
+- `Features/<Recurso>/GetById`
+  Caso de uso de consulta individual.
+- `Features/<Recurso>/Shared`
+  Entidade de dominio e contrato de repositorio.
+- `Common`
+  Tipos compartilhados de configuracao, resultado, abstração de tempo e extensoes HTTP.
+- `Infrastructure/Persistence`
+  Adapter MongoDB.
+- `Infrastructure/DependencyInjection`
+  Bootstrap de handlers, repositorios e banco.
+- `<Assembly>.Tests`
+  Projeto de testes unitarios pronto para evolucao.
 
-To publish:
-  - `dotnet publish -c Release -o ./publish`
-  - Por padrao o template aponta para os secrets AWS `vyracare/shared/mongo` e `vyracare/shared/jwt-signing`
-  - O `appsettings.json` do template fica sem credenciais reais
-  - Opcionalmente configure `CORS_ALLOWED_ORIGINS` para sobrescrever os domínios permitidos
-  - Opcionalmente configure `JWT_ISSUER` e `JWT_AUDIENCE` para sobrescrever os valores versionados
+## O que o template entrega
+
+- API .NET 8 preparada para AWS Lambda + HTTP API.
+- JWT obrigatorio por default.
+- Swagger habilitado.
+- CORS configuravel.
+- Integracao com AWS Secrets Manager.
+- Estrutura pronta para sincronizar MFE consumidor quando configurado.
+- Projeto de testes unitarios com exemplos para handlers.
+
+## Seguranca
+
+O `appsettings.json` do template nao carrega credenciais reais.
+
+Secrets padrao utilizados:
+- `vyracare/shared/mongo`
+- `vyracare/shared/jwt-signing`
+
+Fallbacks suportados:
+- `MONGO_URI`
+- `JWT_KEY`
+- `JWT_ISSUER`
+- `JWT_AUDIENCE`
+- `CORS_ALLOWED_ORIGINS`
+
+## Rename do template
+
+O script [rename-dotnet-project.sh](C:/Users/lenin/OneDrive/Desktop/GitHub/Vyracare/template-dot-net-api/rename-dotnet-project.sh) agora renomeia:
+
+- arquivos
+- diretorios
+- projeto principal
+- projeto de testes
+- nomes internos baseados nos placeholders
+
+Isso permite gerar o esqueleto novo sem manter nomes genericos no repositório criado.
+
+## Testes unitarios
+
+O template cria um projeto `<Assembly>.Tests` com cobertura inicial para:
+
+- handler de criacao
+- handler de consulta por id
+
+Comando esperado no projeto gerado:
+
+```bash
+dotnet test
+```
+
+## Execucao local
+
+```bash
+dotnet restore
+dotnet build
+dotnet run
+```
+
+## Deploy
+
+As APIs geradas por este template usam a esteira reutilizavel do `vyracare-infra-pipes-dot-net`, incluindo:
+
+- publish em Lambda
+- rotas no API Gateway
+- Swagger
+- sincronizacao opcional do MFE consumidor

@@ -126,17 +126,21 @@ for path in Path(".").rglob("*"):
     if updated != text:
         path.write_text(updated, encoding="utf-8")
 
-renames = {
-    Path("Vyracare.Api.[name-generic].csproj"): Path(project_file),
-    Path("Controllers/[resource-generic]Controller.cs"): Path(f"Controllers/{resource_name_pascal}Controller.cs"),
-    Path("DTOS/[resource-generic]Dto.cs"): Path(f"DTOS/{resource_name_pascal}Dto.cs"),
-    Path("Models/[resource-generic]Model.cs"): Path(f"Models/{resource_name_pascal}Model.cs"),
-    Path("Services/[resource-generic]Service.cs"): Path(f"Services/{resource_name_pascal}Service.cs"),
-}
+paths_to_rename = sorted(
+    (path for path in Path(".").rglob("*") if ".git" not in path.parts),
+    key=lambda item: len(item.parts),
+    reverse=True,
+)
 
-for source, target in renames.items():
-    if source.exists():
-        source.rename(target)
+for source in paths_to_rename:
+    target_name = source.name
+    for placeholder, replacement in replacements.items():
+        target_name = target_name.replace(placeholder, replacement)
+
+    if target_name == source.name:
+        continue
+
+    source.rename(source.with_name(target_name))
 
 print(f"Projeto .NET renomeado com sucesso para {repo_name}")
 PY
