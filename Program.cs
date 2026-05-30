@@ -5,9 +5,11 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using System.Text;
+using [assembly-generic].Infrastructure;
 using [assembly-generic].Services;
 
 var builder = WebApplication.CreateBuilder(args);
+await SecretsManagerBootstrapper.ApplyAsync(builder.Configuration);
 var configuration = builder.Configuration;
 
 var mongoUri = configuration["Mongo:ConnectionString"] ?? Environment.GetEnvironmentVariable("MONGO_URI") ?? "mongodb://localhost:27017";
@@ -16,7 +18,7 @@ var corsAllowedOriginsRaw = configuration["Cors:AllowedOrigins"] ?? Environment.
 var corsAllowedOrigins = corsAllowedOriginsRaw
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-var jwtKey = configuration["Jwt:Key"] ?? Environment.GetEnvironmentVariable("JWT_KEY") ?? "[jwt-key-generic]";
+var jwtKey = configuration["Jwt:Key"] ?? Environment.GetEnvironmentVariable("JWT_KEY") ?? throw new InvalidOperationException("Jwt:Key nao configurado.");
 var jwtIssuer = configuration["Jwt:Issuer"] ?? Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "[jwt-issuer-generic]";
 var jwtAudience = configuration["Jwt:Audience"] ?? Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "[jwt-audience-generic]";
 

@@ -23,7 +23,7 @@ Integracao opcional com MFE:
 
 Setup local:
   - Install .NET 8 SDK
-  - Configure a MongoDB cluster and set `MONGO_URI` env var or update `appsettings.json`
+  - Configure `dotnet user-secrets` ou use as env vars `MONGO_URI` e `JWT_KEY`
   - Ajuste `Cors:AllowedOrigins` caso queira restringir origens
   - `dotnet restore`
   - `dotnet build`
@@ -31,6 +31,7 @@ Setup local:
 
 To publish:
   - `dotnet publish -c Release -o ./publish`
-  - Configure o secret `MONGO_URI` no repositório para o deploy da Lambda acessar o banco real
+  - Por padrao o template aponta para os secrets AWS `vyracare/shared/mongo` e `vyracare/shared/jwt-signing`
+  - O `appsettings.json` do template fica sem credenciais reais
   - Opcionalmente configure `CORS_ALLOWED_ORIGINS` para sobrescrever os domínios permitidos
-  - Opcionalmente configure `JWT_KEY`, `JWT_ISSUER` e `JWT_AUDIENCE` para sobrescrever os valores versionados
+  - Opcionalmente configure `JWT_ISSUER` e `JWT_AUDIENCE` para sobrescrever os valores versionados
