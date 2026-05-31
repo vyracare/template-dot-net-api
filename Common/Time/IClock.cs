@@ -1,7 +1,7 @@
 namespace [assembly-generic].Common.Time;
 
 /// <summary>
-/// Representa o componente respons?vel por fornecer a data e hora atual para a aplica??o.
+/// Define um contrato para fornecer a data e hora atual da aplicação.
 /// </summary>
 public interface IClock
 {

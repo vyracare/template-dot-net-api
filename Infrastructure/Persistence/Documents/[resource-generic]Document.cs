@@ -1,42 +1,51 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using [assembly-generic].Common.Configuration;
+using [assembly-generic].Common.Time;
+using [assembly-generic].Features.[resource-generic].Create;
+using [assembly-generic].Features.[resource-generic].GetById;
+using [assembly-generic].Features.[resource-generic].List;
+using [assembly-generic].Features.[resource-generic].Shared.Ports;
+using [assembly-generic].Infrastructure.Persistence;
+using [assembly-generic].Infrastructure.Time;
 
-namespace [assembly-generic].Infrastructure.Persistence.Documents;
+namespace [assembly-generic].Infrastructure.DependencyInjection;
 
 /// <summary>
-/// Representa o formato persistido no MongoDB para esta entidade.
+/// Centraliza métodos de extensão responsáveis por registrar dependências da aplicação.
 /// </summary>
-public sealed class [resource-generic]Document
+public static class ServiceCollectionExtensions
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
 /// <summary>
-/// Identificador do registro ou do recurso processado.
+/// Registra os serviços necessários para conectar a aplicação ao MongoDB.
 /// </summary>
-    public string? Id { get; set; }
+    public static IServiceCollection AddMongo(this IServiceCollection services)
+    {
+        services.AddSingleton<IMongoClient>(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
+            return new MongoClient(options.ConnectionString);
+        });
+
+        services.AddScoped(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
+            return sp.GetRequiredService<IMongoClient>().GetDatabase(options.Database);
+        });
+
+        return services;
+    }
 
 /// <summary>
-/// Nome principal associado ao recurso.
+/// Registra dependências e configurações relacionadas a este componente.
 /// </summary>
-    public string Name { get; set; } = string.Empty;
-/// <summary>
-/// C?digo interno usado para identificar o recurso no dom?nio.
-/// </summary>
-    public string? Code { get; set; }
-/// <summary>
-/// Descri??o textual usada para complementar o entendimento do recurso.
-/// </summary>
-    public string? Description { get; set; }
-/// <summary>
-/// Indica se o recurso est? habilitado para uso.
-/// </summary>
-    public bool IsActive { get; set; }
-/// <summary>
-/// Data de cria??o do registro.
-/// </summary>
-    public DateTime CreatedAt { get; set; }
-/// <summary>
-/// Data da ?ltima atualiza??o do registro.
-/// </summary>
-    public DateTime UpdatedAt { get; set; }
+    public static IServiceCollection AddApplicationCore(this IServiceCollection services)
+    {
+        services.AddSingleton<IClock, SystemClock>();
+        services.AddScoped<I[resource-generic]Repository, Mongo[resource-generic]Repository>();
+        services.AddScoped<Create[resource-generic]Handler>();
+        services.AddScoped<Get[resource-generic]ByIdHandler>();
+        services.AddScoped<List[resource-generic]Handler>();
+        return services;
+    }
 }

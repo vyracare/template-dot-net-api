@@ -1,24 +1,9 @@
-using [assembly-generic].Common.Results;
-using [assembly-generic].Features.[resource-generic].Shared.Domain;
-using [assembly-generic].Features.[resource-generic].Shared.Ports;
-
-namespace [assembly-generic].Features.[resource-generic].List;
+namespace [assembly-generic].Common.Time;
 
 /// <summary>
-/// Implementa a regra de neg?cio do caso de uso representado por esta pasta.
+/// Define um contrato para fornecer a data e hora atual da aplicação.
 /// </summary>
-public sealed class List[resource-generic]Handler
+public interface IClock
 {
-    private readonly I[resource-generic]Repository _repository;
-
-    public List[resource-generic]Handler(I[resource-generic]Repository repository)
-    {
-        _repository = repository;
-    }
-
-    public async Task<UseCaseResult<IReadOnlyCollection<[resource-generic]>>> HandleAsync()
-    {
-        var items = await _repository.ListAsync();
-        return UseCaseResult<IReadOnlyCollection<[resource-generic]>>.Success(items);
-    }
+    DateTime UtcNow { get; }
 }
