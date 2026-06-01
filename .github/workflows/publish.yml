@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - main
 
 jobs:
   cd-dot-net:
@@ -14,7 +15,7 @@ jobs:
       project-path: "[project-file-generic]"
       output-dir: backend-publish
       api-gateway-name: "[repo-generic]"
-      lambda-function-name: "[lambda-name-generic]"
+      lambda-function-name: "[repo-generic]"
       lambda-handler: "[assembly-generic]"
       route-base-path: "api/[table-route-generic]"
     secrets: inherit
