@@ -73,6 +73,8 @@ project_suffix_pascal = to_pascal_case(api_suffix)
 resource_name_pascal = to_pascal_case(table_name)
 assembly_name = f"Vyracare.Api.{project_suffix_pascal}"
 project_file = f"{assembly_name}.csproj"
+test_assembly_name = f"{assembly_name}.Tests"
+test_project_file = f"{test_assembly_name}/{test_assembly_name}.csproj"
 lambda_function_name = f"{repo_name}-dev"
 api_description = os.environ.get("API_DESCRIPTION", "")
 consumer_mfe_repository = normalize_repo_full_name(os.environ.get("CONSUMER_MFE_REPOSITORY_RAW", ""))
@@ -312,6 +314,7 @@ pr_to_main_workflow_path.write_text(
         "    with:",
         "      branch-name: ${{ github.ref_name }}",
         f"      project-path: {project_file}",
+        f"      test-project-path: {test_project_file}",
         "      output-dir: ./publish",
         "    secrets: inherit",
         "",

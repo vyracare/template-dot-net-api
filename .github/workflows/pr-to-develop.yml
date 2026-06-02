@@ -13,6 +13,7 @@ jobs:
     with:
       branch-name: ${{ github.ref_name }}
       project-path: "[project-file-generic]"
+      test-project-path: "Vyracare.Api.[name-generic].Tests/Vyracare.Api.[name-generic].Tests.csproj"
       output-dir: ./publish
     secrets: inherit
 
