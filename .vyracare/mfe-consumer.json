@@ -7,7 +7,6 @@
       "src/environments/environments.hml.ts",
       "src/environments/environments.prod.ts"
     ],
-    "apiUrlProperty": "apiUrl",
-    "environmentProperties": {}
+    "apiUrlProperty": "apiUrl"
   }
 }
