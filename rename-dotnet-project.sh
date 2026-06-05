@@ -83,8 +83,8 @@ jwt_key = os.environ.get("JWT_KEY_RAW", "").strip() or "[jwt-key-generic]"
 jwt_issuer = os.environ.get("JWT_ISSUER_RAW", "").strip() or "[jwt-issuer-generic]"
 jwt_audience = os.environ.get("JWT_AUDIENCE_RAW", "").strip() or "[jwt-audience-generic]"
 jwt_expiry_minutes = os.environ.get("JWT_EXPIRY_MINUTES_RAW", "").strip() or "[jwt-expiry-minutes-generic]"
-mongo_secret_name = "vyracare/shared/mongo-prod"
-jwt_secret_name = "vyracare/shared/jwt-signing-prod"
+mongo_parameter_name = "vyracare/shared/mongo-prod"
+jwt_parameter_name = "vyracare/shared/jwt-signing-prod"
 
 replacements = {
     "[repo-generic]": repo_name,
@@ -103,8 +103,8 @@ replacements = {
     "[jwt-issuer-generic]": jwt_issuer,
     "[jwt-audience-generic]": jwt_audience,
     "[jwt-expiry-minutes-generic]": jwt_expiry_minutes,
-    "[mongo-secret-name-generic]": mongo_secret_name,
-    "[jwt-secret-name-generic]": jwt_secret_name,
+    "[mongo-parameter-name-generic]": mongo_parameter_name,
+    "[jwt-parameter-name-generic]": jwt_parameter_name,
 }
 
 for path in Path(".").rglob("*"):

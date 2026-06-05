@@ -11,7 +11,7 @@ Ele ja nasce com:
 - MongoDB
 - AWS Lambda
 - Swagger
-- integracao com AWS Secrets Manager
+- integracao com AWS Systems Manager Parameter Store
 - projeto de testes unitarios
 - automacao de rename para adaptar nomes de assembly, recurso e rotas
 
@@ -73,7 +73,7 @@ Contem:
 
 Contem detalhes tecnicos:
 
-- leitura de secrets
+- leitura de parametros seguros
 - repositorio Mongo
 - documento Mongo
 - DI
@@ -109,11 +109,13 @@ Essa estrutura foi escolhida porque:
 
 O template ja nasce sem segredos reais versionados.
 
-Secrets padrao:
+Parametros padrao:
 
 - `vyracare/shared/mongo-prod`
+- `vyracare/shared/mongo-hml`
 - `vyracare/shared/mongo-dev`
 - `vyracare/shared/jwt-signing-prod`
+- `vyracare/shared/jwt-signing-hml`
 - `vyracare/shared/jwt-signing-dev`
 
 Fallbacks suportados:
@@ -127,7 +129,7 @@ Fallbacks suportados:
 Arquivos importantes:
 
 - [appsettings.json](C:/Users/lenin/OneDrive/Desktop/GitHub/Vyracare/template-dot-net-api/appsettings.json)
-- [SecretsManagerBootstrapper.cs](C:/Users/lenin/OneDrive/Desktop/GitHub/Vyracare/template-dot-net-api/Infrastructure/SecretsManagerBootstrapper.cs)
+- [ParameterStoreBootstrapper.cs](C:/Users/lenin/OneDrive/Desktop/GitHub/Vyracare/template-dot-net-api/Infrastructure/ParameterStoreBootstrapper.cs)
 
 ## Testes unitarios no template
 
@@ -174,5 +176,5 @@ Os projetos gerados a partir deste template devem seguir o padrao de commits em 
 Exemplos:
 
 - `feat: adiciona endpoint de agendamento`
-- `fix: corrige leitura de secret do mongo`
+- `fix: corrige leitura de parametro do mongo`
 - `docs: atualiza readme da api`
