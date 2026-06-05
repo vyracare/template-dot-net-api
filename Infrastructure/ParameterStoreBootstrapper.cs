@@ -96,7 +96,7 @@ public static class ParameterStoreBootstrapper
             var environmentValue = Environment.GetEnvironmentVariable(environmentVariable);
             if (!string.IsNullOrWhiteSpace(environmentValue))
             {
-                return environmentValue;
+                return NormalizeParameterName(environmentValue);
             }
         }
 
@@ -105,11 +105,22 @@ public static class ParameterStoreBootstrapper
             var configValue = configuration[configKey];
             if (!string.IsNullOrWhiteSpace(configValue))
             {
-                return configValue;
+                return NormalizeParameterName(configValue);
             }
         }
 
         return null;
+    }
+
+    private static string NormalizeParameterName(string parameterName)
+    {
+        var trimmedName = parameterName.Trim();
+        if (trimmedName.Contains('/') && !trimmedName.StartsWith('/'))
+        {
+            return "/" + trimmedName;
+        }
+
+        return trimmedName;
     }
 
     private static string ExtractParameterValue(string parameterValue, string parameterPropertyName)
