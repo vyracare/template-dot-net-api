@@ -4,6 +4,11 @@
 
 Este repositorio e o template base usado para gerar novas APIs .NET da Vyracare.
 
+Baseline tecnico atual do template:
+
+- `TargetFramework` gerado: `net10.0`
+- runtime AWS Lambda esperado: `dotnet10`
+
 Ele ja nasce com:
 
 - arquitetura em `vertical slice`
