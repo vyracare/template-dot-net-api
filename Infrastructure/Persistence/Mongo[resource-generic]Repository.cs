@@ -1,51 +1,60 @@
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using [assembly-generic].Common.Configuration;
-using [assembly-generic].Common.Time;
-using [assembly-generic].Features.[resource-generic].Create;
-using [assembly-generic].Features.[resource-generic].GetById;
-using [assembly-generic].Features.[resource-generic].List;
+using [assembly-generic].Features.[resource-generic].Shared.Domain;
 using [assembly-generic].Features.[resource-generic].Shared.Ports;
-using [assembly-generic].Infrastructure.Persistence;
-using [assembly-generic].Infrastructure.Time;
+using [assembly-generic].Infrastructure.Persistence.Documents;
 
-namespace [assembly-generic].Infrastructure.DependencyInjection;
+namespace [assembly-generic].Infrastructure.Persistence;
 
-/// <summary>
-/// Centraliza métodos de extensão responsáveis por registrar dependências da aplicação.
-/// </summary>
-public static class ServiceCollectionExtensions
+public sealed class Mongo[resource-generic]Repository : I[resource-generic]Repository
 {
-/// <summary>
-/// Registra os serviços necessários para conectar a aplicação ao MongoDB.
-/// </summary>
-    public static IServiceCollection AddMongo(this IServiceCollection services)
+    private readonly IMongoCollection<[resource-generic]Document> _collection;
+
+    public Mongo[resource-generic]Repository(IMongoDatabase database)
     {
-        services.AddSingleton<IMongoClient>(sp =>
-        {
-            var options = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
-            return new MongoClient(options.ConnectionString);
-        });
-
-        services.AddScoped(sp =>
-        {
-            var options = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
-            return sp.GetRequiredService<IMongoClient>().GetDatabase(options.Database);
-        });
-
-        return services;
+        _collection = database.GetCollection<[resource-generic]Document>("[table-generic]");
     }
 
-/// <summary>
-/// Registra dependências e configurações relacionadas a este componente.
-/// </summary>
-    public static IServiceCollection AddApplicationCore(this IServiceCollection services)
+    public async Task<[resource-generic]> AddAsync([resource-generic] resource)
     {
-        services.AddSingleton<IClock, SystemClock>();
-        services.AddScoped<I[resource-generic]Repository, Mongo[resource-generic]Repository>();
-        services.AddScoped<Create[resource-generic]Handler>();
-        services.AddScoped<Get[resource-generic]ByIdHandler>();
-        services.AddScoped<List[resource-generic]Handler>();
-        return services;
+        var document = ToDocument(resource);
+        await _collection.InsertOneAsync(document);
+        resource.Id = document.Id;
+        return resource;
     }
+
+    public async Task<[resource-generic]?> GetByIdAsync(string id)
+    {
+        var document = await _collection.Find(item => item.Id == id).FirstOrDefaultAsync();
+        return document is null ? null : ToDomain(document);
+    }
+
+    public async Task<IReadOnlyCollection<[resource-generic]>> ListAsync()
+    {
+        var documents = await _collection.Find(_ => true).ToListAsync();
+        return documents.Select(ToDomain).ToArray();
+    }
+
+    private static [resource-generic]Document ToDocument([resource-generic] resource) =>
+        new()
+        {
+            Id = resource.Id,
+            Name = resource.Name,
+            Code = resource.Code,
+            Description = resource.Description,
+            IsActive = resource.IsActive,
+            CreatedAt = resource.CreatedAt,
+            UpdatedAt = resource.UpdatedAt
+        };
+
+    private static [resource-generic] ToDomain([resource-generic]Document document) =>
+        new()
+        {
+            Id = document.Id,
+            Name = document.Name,
+            Code = document.Code,
+            Description = document.Description,
+            IsActive = document.IsActive,
+            CreatedAt = document.CreatedAt,
+            UpdatedAt = document.UpdatedAt
+        };
 }

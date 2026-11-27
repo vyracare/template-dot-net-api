@@ -1,9 +1,8 @@
-namespace [assembly-generic].Common.Time;
+namespace [assembly-generic].Features.[resource-generic].Create;
 
-/// <summary>
-/// Define um contrato para fornecer a data e hora atual da aplicação.
-/// </summary>
-public interface IClock
-{
-    DateTime UtcNow { get; }
-}
+public sealed record Create[resource-generic]Request(
+    string Name,
+    string? Code,
+    string? Description,
+    bool IsActive
+);
