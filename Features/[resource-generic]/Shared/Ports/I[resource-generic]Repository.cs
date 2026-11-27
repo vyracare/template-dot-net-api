@@ -1,9 +1,11 @@
-namespace [assembly-generic].Common.Time;
+using [assembly-generic].Features.[resource-generic].Shared.Domain;
+using ResourceEntity = [assembly-generic].Features.[resource-generic].Shared.Domain.[resource-generic];
 
-/// <summary>
-/// Define um contrato para fornecer a data e hora atual da aplicação.
-/// </summary>
-public interface IClock
+namespace [assembly-generic].Features.[resource-generic].Shared.Ports;
+
+public interface I[resource-generic]Repository
 {
-    DateTime UtcNow { get; }
+    Task<ResourceEntity> AddAsync(ResourceEntity resource);
+    Task<ResourceEntity?> GetByIdAsync(string id);
+    Task<IReadOnlyCollection<ResourceEntity>> ListAsync();
 }

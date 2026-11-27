@@ -9,13 +9,18 @@ on:
 
 jobs:
   ci-dot-net:
-    uses: vyracare/vyracare-infra-pipes-dot-net/.github/workflows/ci-generic-dot-net.yml@main
-    with:
-      branch-name: ${{ github.ref_name }}
-      project-path: "[project-file-generic]"
-      test-project-path: "Vyracare.Api.[name-generic].Tests/Vyracare.Api.[name-generic].Tests.csproj"
-      output-dir: ./publish
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.404
+      - name: Gerar projeto de validacao
+        run: bash rename-dotnet-project.sh vyracare-api-validacao vyracare_test registros
+      - name: Testar projeto gerado
+        run: dotnet test Vyracare.Api.Validacao.Tests/Vyracare.Api.Validacao.Tests.csproj --configuration Release
+      - name: Publicar artefato de validacao
+        run: dotnet publish Vyracare.Api.Validacao.csproj --configuration Release --output ./publish
 
   open-pr-develop:
     runs-on: ubuntu-latest
